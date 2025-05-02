@@ -1,0 +1,279 @@
+/* Reset general */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Global */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  padding: 20px;
+  background-color: #d5b3f3;
+}
+
+/* Notes grid */
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 25px;
+}
+
+/* Note card */
+.note-card {
+  position: relative;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: #070505;
+  min-height: 100px;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.note-unlocked, .new-note {
+  background-color: #e6f4d8;
+}
+
+.note-locked, .note-private {
+  background-color: #f9d2d2;
+}
+
+.note-card i {
+  font-size: 18px;
+}
+
+/* Mostrar solo en escritorio */
+.solo-desktop {
+  display: none;
+}
+
+/* Mostrar solo en móvil por defecto */
+.solo-mobile {
+  display: block;
+}
+
+/* Responsive */
+.container-app {
+  display: flex;
+  flex-direction: column;
+  min-height: -100vh;
+}
+
+/* Header móvil */
+.mobile-header {
+  background-color: #ffffff;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 10px;
+}
+
+.mobile-header .bi-list {
+  font-size: 24px;
+}
+
+.mobile-header input {
+  padding: 9px;
+  border-radius: 8px;
+  border: none;
+  width: 100%;
+  max-width: 600px;
+}
+
+.bi-person-circle {
+  font-size: 60px;
+  margin-right: 0;
+}
+
+/* Pantallas grandes (desktop) */
+@media (min-width: 768px) {
+  .solo-desktop {
+    display: block; 
+  }
+
+  .solo-mobile {
+    display: none;
+  }
+
+  .container-app {
+    flex-direction: row;
+  }
+
+  .mobile-header {
+    display: none;
+  }
+
+  /* Sidebar para escritorio */
+  .sidebar {
+    width: 230px;
+    background-color: #d5b3f3;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-sidebar a {
+    display: block;
+    text-decoration: none;
+    color: #000;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .nav-sidebar a:hover {
+    background-color: #7b00e636;
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header.solo-desktop {
+    max-width: 100%;
+    justify-content: space-between;
+    border-radius: 25px;
+    align-items: center;
+    padding: 16px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .search-input {
+    width: 70%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 16px;
+  }
+
+  .profile-icon {
+    font-size: 28px;
+    color: #666;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    margin-left: 3cm;
+  }
+
+  .notes-grid {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    overflow-y: auto;
+  }
+}
+
+/* Pantallas pequeñas (móviles) */
+@media (max-width: 768px) {
+  /* Menú hamburguesa */
+  .hamburger-menu {
+    display: block;
+    font-size: 30px;
+    cursor: pointer;
+    padding: 10px;
+  }
+
+  /* Menú lateral */
+  .mobile-nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #d5b3f3;
+    width: 250px;
+    height: 100%;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .mobile-nav-links a {
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .mobile-nav-links a:hover {
+    background-color: #ddd;
+  }
+
+  .mobile-nav-links.active {
+    display: flex;
+  }
+}
+
+/* Estilos para el botón Añadir Nota */
+.btn-add-note {
+  background-color: #7b00e6;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-add-note:hover {
+  background-color: #5a00b5;
+}
+
+/* Posición botón escritorio */
+.add-note-desktop {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 30px 0;
+}
+
+/* Posición botón móvil */
+.add-note-mobile {
+  display: flex;
+  justify-content: center;
+  padding: 15px 0;
+}
+/* Menú lateral móvil */
+.mobile-nav-links {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #d5b3f3;
+  width: 250px;
+  height: 100%;
+  padding: 20px;
+  gap: 20px;
+  z-index: 1000; /* Asegura que el menú esté encima de otros elementos */
+}
+/* Por defecto, las secciones solo desktop están ocultas */
+.solo-desktop {
+  display: none;
+}
+
+/* Cuando el ancho de la pantalla sea mayor a 768px, muestra las secciones de escritorio y oculta las de móvil */
+@media (min-width: 768px) {
+  .solo-desktop {
+    display: block;
+  }
+
+  .solo-mobile {
+    display: none;
+  }
+}
