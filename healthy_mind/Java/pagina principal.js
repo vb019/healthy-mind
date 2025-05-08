@@ -30,89 +30,6 @@ document.querySelectorAll(".barralista li a").forEach(enlace => {
     });
 });
 
-function moveCarousel(carouselId, direction) {
-    const carousel = document.getElementById(carouselId);
-    const wrapper = carousel.querySelector('.carousel-wrapper');
-    const items = wrapper.children;
-    const totalItems = items.length;
-
-    let currentIndex = parseInt(wrapper.getAttribute('data-index')) || 0;
-    currentIndex += direction;
-
-    if (currentIndex < 0) {
-        currentIndex = totalItems - 1;
-    } else if (currentIndex >= totalItems) {
-        currentIndex = 0;
-    }
-
-    wrapper.style.transform = `translateX(-${currentIndex * 100}%)`; 
-    wrapper.setAttribute('data-index', currentIndex);
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    const carousels = document.querySelectorAll(".contenido_carrusel");
-
-    carousels.forEach(carousel => {
-        const wrapper = carousel.querySelector(".carousel-wrapper");
-
-        let startX = 0;
-        let endX = 0;
-
-        // Guardar la posición inicial del toque
-        wrapper.addEventListener("touchstart", (e) => {
-            startX = e.touches[0].clientX;
-        });
-
-        // Guardar la posición final del toque y decidir el movimiento
-        wrapper.addEventListener("touchend", (e) => {
-            endX = e.changedTouches[0].clientX;
-            handleSwipe(carousel.id);
-        });
-
-        function handleSwipe(carouselId) {
-            const diff = startX - endX;
-            if (Math.abs(diff) > 50) {
-                moveCarousel(carouselId, diff > 0 ? 1 : -1);
-            }
-        }
-    });
-});
-
-function toggleArrows() {
-    const isMobile = window.innerWidth <= 600;
-    document.querySelectorAll(".flechas_carrusel").forEach(arrow => {
-        arrow.style.display = isMobile ? "none" : "block";
-    });
-}
-
-window.addEventListener("load", toggleArrows);
-window.addEventListener("resize", toggleArrows);
-
-function handleClick(element) {
-    document.querySelectorAll('.inferiores_item').forEach(item => {
-        item.classList.remove('active');
-    });
-    element.classList.add('active');
-}
-
-const carousels = document.querySelectorAll(".contenido_carrusel");
-
-abrir.addEventListener("click", () => {
-    nav.classList.add("visible");
-    logo.style.display = "none";
-    carousels.forEach(carousel => {
-        carousel.classList.add("hidden");
-    });
-});
-
-cerrar.addEventListener("click", () => {
-    nav.classList.remove("visible");
-    logo.style.display = "block";
-    carousels.forEach(carousel => {
-        carousel.classList.remove("hidden");
-    });
-});
-
 const commentBoxes = document.querySelectorAll(".caja_comentarios");
 
 abrir.addEventListener("click", () => {
@@ -123,39 +40,10 @@ cerrar.addEventListener("click", () => {
     commentBoxes.forEach(comment => comment.style.display = "block");
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    const body = document.body;
-    const themeStatus = document.getElementById("theme-status");
-    const toggleThemeBtn = document.getElementById("toggle-theme");
-
-    function toggleDarkMode() {
-        body.classList.toggle("dark-mode");
-        const isDarkMode = body.classList.contains("dark-mode");
-        localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-
-        if (themeStatus) {
-            themeStatus.textContent = isDarkMode ? "Oscuro" : "Claro";
-        }
-    }
-
-    if (localStorage.getItem("theme") === "dark") {
-        body.classList.add("dark-mode");
-        if (themeStatus) {
-            themeStatus.textContent = "Oscuro";
-        }
-    } else {
-        if (themeStatus) {
-            themeStatus.textContent = "Claro";
-        }
-    }
-
-    if (toggleThemeBtn) {
-        toggleThemeBtn.addEventListener("click", toggleDarkMode);
-    }
-});
-
 // Variable global para almacenar el usuario autenticado
 let currentUser = null;
+// Variable global para el timeout de verificación
+let verificacionTimeout = null;
 
 /* ============================
    Funciones de Validación
@@ -180,6 +68,66 @@ function validarTexto(texto) {
     return false;
   }
   return true;
+}
+
+/* ============================
+   Verificación de Comentarios con GEMINI API
+   ============================ */
+async function verificarComentario(texto) {
+  const btnPublicar = document.getElementById('btnPublicar');
+  const statusIndicator = document.getElementById('statusIndicator');
+  const statusIcon = document.getElementById('statusIcon');
+  const statusText = document.getElementById('statusText');
+       
+  // Si el texto está vacío, deshabilitar el botón y ocultar el indicador
+  if (!texto.trim()) {
+    btnPublicar.disabled = true;
+    statusIndicator.classList.add('hidden');
+    statusText.textContent = '';
+    statusIcon.textContent = '';
+    return;
+  }
+       
+  // Limpiamos cualquier timeout previo para evitar verificaciones múltiples
+  clearTimeout(verificacionTimeout);
+       
+  // Esperamos 500ms para verificar (evita llamadas a la API en cada tecla)
+  verificacionTimeout = setTimeout(async () => {
+    // Mostrar indicador de carga
+    statusIndicator.classList.remove('hidden');
+    statusIndicator.className = 'status-indicator status-loading';
+    statusIcon.textContent = '⏳';
+    statusText.innerHTML = '<span class="loader"></span>Verificando contenido...';
+           
+    try {
+      const response = await fetch('http://localhost:5000/moderar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenido: texto })
+      });
+               
+      const resultado = await response.json();
+               
+      // Actualizar UI según el resultado
+      if (resultado.clasificacion === 'aprobado') {
+        btnPublicar.disabled = false;
+        statusIndicator.className = 'status-indicator status-approved';
+        statusIcon.textContent = '✅';
+        statusText.textContent = 'Contenido apropiado. Puedes publicar tu comentario.';
+      } else {
+        btnPublicar.disabled = true;
+        statusIndicator.className = 'status-indicator status-rejected';
+        statusIcon.textContent = '❌';
+        statusText.textContent = `Contenido inapropiado: ${resultado.explicacion}`;
+      }
+    } catch (error) {
+      console.error('Error al verificar contenido:', error);
+      statusIndicator.className = 'status-indicator status-rejected';
+      statusIcon.textContent = '⚠️';
+      statusText.textContent = 'Error al verificar el contenido. Inténtalo de nuevo.';
+      btnPublicar.disabled = true;
+    }
+  }, 500);
 }
 
 /* ============================
@@ -243,6 +191,7 @@ function toggleLoginModal() {
 /* ============================
    Creación de Comentarios
    ============================ */
+// Modifica la función crearElementoEntrada para añadir verificación a las respuestas
 function crearElementoEntrada(texto, tipo) {
   const contenedor = document.createElement("div");
   contenedor.classList.add(tipo);
@@ -305,9 +254,23 @@ function crearElementoEntrada(texto, tipo) {
   inputRespuesta.placeholder = "Escribe una respuesta...";
   inputRespuesta.classList.add("input-respuesta");
 
+  // Crear un contenedor para el estado de la respuesta
+  const respuestaStatusIndicator = document.createElement('div');
+  respuestaStatusIndicator.className = 'status-indicator hidden';
+  
+  const respuestaStatusIcon = document.createElement('span');
+  respuestaStatusIcon.className = 'status-icon';
+  
+  const respuestaStatusText = document.createElement('span');
+  respuestaStatusText.className = 'status-text';
+  
+  respuestaStatusIndicator.appendChild(respuestaStatusIcon);
+  respuestaStatusIndicator.appendChild(respuestaStatusText);
+
   const botonRespuesta = document.createElement("button");
   botonRespuesta.textContent = "Responder";
   botonRespuesta.classList.add("boton-responder");
+  botonRespuesta.disabled = true; // Deshabilitar por defecto hasta que pase verificación
 
   const contenedorRespuestas = document.createElement("div");
   contenedorRespuestas.classList.add("respuestas");
@@ -326,10 +289,15 @@ function crearElementoEntrada(texto, tipo) {
   };
 
   contenedor.appendChild(toggleRespuestasBtn);
+  
+  // Añadir el evento de input para verificar la respuesta mientras se escribe
+  inputRespuesta.addEventListener('input', function() {
+    verificarRespuesta(this.value, botonRespuesta, respuestaStatusIndicator, respuestaStatusIcon, respuestaStatusText);
+  });
 
   botonRespuesta.onclick = () => {
     const resp = inputRespuesta.value.trim();
-    if (resp && validarTexto(resp)) {
+    if (resp) {
       if (!currentUser) {
         mostrarVentanaEmergente("Debes iniciar sesión para responder.");
         return;
@@ -337,14 +305,78 @@ function crearElementoEntrada(texto, tipo) {
       const nueva = crearElementoEntrada(resp, "respuesta");
       contenedorRespuestas.appendChild(nueva);
       inputRespuesta.value = "";
+      
+      // Reiniciar el estado de verificación
+      botonRespuesta.disabled = true;
+      respuestaStatusIndicator.classList.add('hidden');
     }
   };
 
   contenedor.appendChild(inputRespuesta);
+  contenedor.appendChild(respuestaStatusIndicator); // Añadir el indicador de estado
   contenedor.appendChild(botonRespuesta);
   contenedor.appendChild(contenedorRespuestas);
 
   return contenedor;
+}
+
+// Nueva función para verificar respuestas (similar a verificarComentario pero específica para respuestas)
+async function verificarRespuesta(texto, boton, indicador, icono, textoIndicador) {
+  // Si el texto está vacío, deshabilitar el botón y ocultar el indicador
+  if (!texto.trim()) {
+    boton.disabled = true;
+    indicador.classList.add('hidden');
+    textoIndicador.textContent = ' ';
+    icono.textContent = ' ';
+    return;
+  }
+  
+  // Limpiamos cualquier timeout previo para evitar verificaciones múltiples
+  clearTimeout(verificacionTimeout);
+  
+  // Esperamos 500ms para verificar (evita llamadas a la API en cada tecla)
+  verificacionTimeout = setTimeout(async () => {
+    // Primera verificación básica
+    if (!validarTexto(texto)) {
+      boton.disabled = true;
+      return;
+    }
+    
+    // Mostrar indicador de carga
+    indicador.classList.remove('hidden');
+    indicador.className = 'status-indicator status-loading';
+    icono.textContent = '⏳';
+    textoIndicador.innerHTML = '<span class="loader"></span>Verificando contenido...';
+      
+    try {
+      const response = await fetch('http://localhost:5000/moderar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenido: texto })
+      });
+          
+      const resultado = await response.json();
+          
+      // Actualizar UI según el resultado
+      if (resultado.clasificacion === 'aprobado') {
+        boton.disabled = false;
+        indicador.className = 'status-indicator status-approved';
+        icono.textContent = '✅';
+        textoIndicador.textContent = 'Contenido apropiado. Puedes publicar tu respuesta.';
+      } else {
+        boton.disabled = true;
+        indicador.className = 'status-indicator status-rejected';
+        icono.textContent = '❌';
+        textoIndicador.textContent = `Contenido inapropiado: ${resultado.explicacion}`;
+      }
+    } catch (error) {
+      console.error('Error al verificar contenido:', error);
+      indicador.className = 'status-indicator status-rejected';
+      icono.textContent = '⚠️';
+      textoIndicador.textContent = 'Error al verificar el contenido. Inténtalo de nuevo.';
+      boton.disabled = true;
+    }
+  }, 500);
 }
 
 /* ============================
@@ -430,32 +462,85 @@ function actualizarUltimosPosts() {
 /* ============================
    Publicar Comentario
    ============================ */
-function publicarComentario() {
-  const texto = document.getElementById("comentario").value.trim();
-
-  if (!currentUser) {
-    mostrarVentanaEmergente("Debes iniciar sesión para comentar.");
-    return;
+   function publicarComentario() {
+    const texto = document.getElementById("comentario").value.trim();
+  
+    if (!currentUser) {
+      mostrarVentanaEmergente("Debes iniciar sesión para comentar.");
+      return;
+    }
+  
+    if (!texto || !validarTexto(texto)) return;
+  
+    const nuevo = crearElementoEntrada(texto, "comentario");
+    document.getElementById("lista_comentarios").prepend(nuevo);
+    document.getElementById("comentario").value = "";
+    
+    // Ocultar el indicador de estado después de publicar
+    const statusIndicator = document.getElementById('statusIndicator');
+    if (statusIndicator) {
+      statusIndicator.classList.add('hidden');
+      document.getElementById('statusIcon').textContent = '';
+      document.getElementById('statusText').textContent = '';
+    }
+    
+    // Desactivar el botón hasta que se escriba un nuevo comentario
+    const btnPublicar = document.getElementById('btnPublicar');
+    if (btnPublicar) {
+      btnPublicar.disabled = true;
+    }
+  
+    const hora = obtenerHoraFormateada();
+    todosLosPosts.push({ usuario: currentUser, texto, hora });
+    actualizarUltimosPosts();
   }
-
-  if (!texto || !validarTexto(texto)) return;
-
-  const nuevo = crearElementoEntrada(texto, "comentario");
-  document.getElementById("lista_comentarios").prepend(nuevo);
-  document.getElementById("comentario").value = "";
-
-  const hora = obtenerHoraFormateada();
-  todosLosPosts.push({ usuario: currentUser, texto, hora });
-  actualizarUltimosPosts();
-}
 
 /* ============================
    Inicialización
    ============================ */
 document.addEventListener('DOMContentLoaded', function () {
+  // Agregar el componente de verificación al formulario de comentarios
+  const cajaComentarios = document.querySelector(".caja_comentarios");
+  if (cajaComentarios) {
+    // Crear el indicador de estado
+    const statusIndicator = document.createElement('div');
+    statusIndicator.id = 'statusIndicator';
+    statusIndicator.className = 'status-indicator hidden';
+    
+    const statusIcon = document.createElement('span');
+    statusIcon.id = 'statusIcon';
+    statusIcon.className = 'status-icon';
+    
+    const statusText = document.createElement('span');
+    statusText.id = 'statusText';
+    statusText.className = 'status-text';
+    
+    statusIndicator.appendChild(statusIcon);
+    statusIndicator.appendChild(statusText);
+    
+    // Insertar el indicador después del textarea
+    const textarea = document.getElementById('comentario');
+    if (textarea) {
+      textarea.parentNode.insertBefore(statusIndicator, textarea.nextSibling);
+      
+      // Cambiar el botón existente para tener ID
+      const oldButton = document.querySelector(".caja_comentarios > button");
+      if (oldButton) {
+        oldButton.id = 'btnPublicar';
+        oldButton.disabled = true;
+      }
+      
+      // Añadir evento de entrada para activar la verificación
+      textarea.addEventListener('input', function() {
+        verificarComentario(this.value);
+      });
+    }
+  }
+
   const botonPublicar = document.querySelector(".caja_comentarios > button");
   if (botonPublicar) {
     const clon = botonPublicar.cloneNode(true);
+    clon.id = 'btnPublicar';
     botonPublicar.parentNode.replaceChild(clon, botonPublicar);
     clon.addEventListener("click", publicarComentario);
   }
@@ -471,3 +556,77 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const body = document.body;
+  const themeStatus = document.getElementById("theme-status");
+  const toggleThemeBtn = document.getElementById("toggle-theme");
+
+  function toggleDarkMode() {
+      body.classList.toggle("dark-mode");
+      const isDarkMode = body.classList.contains("dark-mode");
+      localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+
+      if (themeStatus) {
+          themeStatus.textContent = isDarkMode ? "Oscuro" : "Claro";
+      }
+  }
+
+  if (localStorage.getItem("theme") === "dark") {
+      body.classList.add("dark-mode");
+      if (themeStatus) {
+          themeStatus.textContent = "Oscuro";
+      }
+  } else {
+      if (themeStatus) {
+          themeStatus.textContent = "Claro";
+      }
+  }
+
+  if (toggleThemeBtn) {
+      toggleThemeBtn.addEventListener("click", toggleDarkMode);
+  }
+});
+// Modal para seleccionar avatar
+document.addEventListener("DOMContentLoaded", function () {
+const modalAvatar = document.getElementById("modalAvatar");
+const btnAbrirModal = document.getElementById("abrirModalAvatar");
+const btnCerrarModal = document.getElementById("cerrarModalAvatar");
+const avatarOpciones = document.querySelectorAll(".avatar-img");
+const avatarSeleccionado = document.getElementById("avatarSeleccionado");
+
+// Cargar avatar desde localStorage si existe
+const avatarGuardado = localStorage.getItem("avatarSeleccionado");
+if (avatarGuardado) {
+    avatarSeleccionado.src = avatarGuardado;
+}
+
+// Abrir modal
+btnAbrirModal.addEventListener("click", function (e) {
+    e.preventDefault();
+    modalAvatar.style.display = "block";
+});
+
+// Cerrar modal
+btnCerrarModal.addEventListener("click", function () {
+    modalAvatar.style.display = "none";
+});
+
+// Seleccionar avatar
+avatarOpciones.forEach(avatar => {
+    avatar.addEventListener("click", function () {
+        const nuevaSrc = this.src;
+        avatarSeleccionado.src = nuevaSrc;
+        localStorage.setItem("avatarSeleccionado", nuevaSrc);
+        modalAvatar.style.display = "none";
+    });
+});
+
+// Cerrar modal al hacer clic fuera
+window.addEventListener("click", function (e) {
+    if (e.target === modalAvatar) {
+        modalAvatar.style.display = "none";
+    }
+});
+});
+
