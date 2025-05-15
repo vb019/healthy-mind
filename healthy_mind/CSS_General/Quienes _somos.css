@@ -7,14 +7,15 @@
 
 body {
     font-family: "Comfortaa", sans-serif;
-    background-image: url(img/778ceecb-3ca1-4994-aa9a-7fa5305e4474.png);
-    background-attachment: fixed;
+    background-image: url(/Imagenes/el-hermoso-campo-de-flores.jpg);
+   
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
     color: #333;
     overflow-x: hidden; /* Evita scroll horizontal */
     position: relative;
+    padding: 35px;
 }
 
 /* Transición de entrada (Overlay) */
@@ -82,11 +83,11 @@ body {
 /* Título principal */
 h1 {
     font-size: 80px;
-    font-weight: 400;
-    color: #000000;
+    font-weight: 400px;
+    color: #694fc5;
     margin: 0;
     text-align: center;
-    text-shadow: 2px 2px 4px rgba(241, 138, 255, 0.5);
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
     flex: 1; /* Ocupa el espacio para quedar centrado */
 }
 
@@ -703,3 +704,254 @@ p:last-of-type {
     z-index: 9998; /* Justo debajo del overlay inicial */
     transition: width 0.1s ease-out; /* Transición suave */
 }
+/* Estilos para la ventana modal - añadir al final del archivo CSS existente */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #ffffff, #f5f0ff);
+    background-size: 200% 200%;
+    animation: gradientBG 15s ease infinite;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 12px 28px rgba(134, 100, 255, 0.25), 0 5px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(134, 100, 255, 0.1);
+    overflow: hidden;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: 600;
+    color: #8662ff;
+    margin: 0;
+    padding: 0;
+}
+
+.modal-body {
+    margin-bottom: 25px;
+}
+
+.modal-body p {
+    font-family: 'Comfortaa', sans-serif;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.email-display {
+    display: inline-block;
+    background-color: #f4f0ff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #8662ff;
+    margin: 10px 0;
+}
+
+.copy-button {
+    background-color: transparent;
+    border: none;
+    color: #8662ff;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    transition: transform 0.2s ease;
+}
+
+.copy-button:hover {
+    transform: scale(1.1);
+}
+
+.close-modal {
+    background-color: #8662ff;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.close-modal:hover {
+    background-color: #6b4fd9;
+    transform: translateY(-2px);
+}
+
+.modal-close-x {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: #8662ff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.modal-close-x:hover {
+    transform: scale(1.1);
+}
+
+.copy-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background-color: #8662ff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-family: 'Comfortaa', sans-serif;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 1100;
+}
+
+.copy-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+
+/* Estilos para el modo oscuro */
+body.dark-mode {
+    background-image: url(/Imagenes/quienesoscuro.jpg);
+}
+   
+.dark-mode {
+    background-color: #353333;
+    color: #f0f0f0;
+}
+
+.dark-mode .header,
+.dark-mode .footer,
+.dark-mode .content-section,
+.dark-mode .valor-card {
+    background-color: #353333;
+    color: #f0f0f0;
+}
+
+.dark-mode p,
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3 {
+    color: #f5f5f5;
+}
+
+.dark-mode a {
+    color: #d0d0d0;
+}
+
+.dark-mode .logo-container img {
+    content: url("/Imagenes/logo.png");
+}
+
+.dark-mode .valor-icon {
+    color: #f0f0f0;
+}
+
+.dark-mode .carousel-dots .dot {
+    background-color: #aaa;
+}
+
+.dark-mode .config_item:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: none;
+    border-left: 4px solid #f0f0f0;
+    background-color: #2a2a2a;
+}
+
+.dark-mode .config_item:hover span {
+    transform: rotate(360deg);
+}
+
+.dark-mode * {
+    transition: all 0.3s ease;
+}
+
+/* Modo oscuro para la ventana modal */
+body.dark-mode .modal {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode .modal-content {
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2e, #1f1b2e);
+  box-shadow: 0 12px 28px rgba(255, 255, 255, 0.05), 0 5px 10px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .modal-header h3,
+body.dark-mode .modal-body p,
+body.dark-mode .email-display,
+body.dark-mode .copy-button {
+  color: #e0cfff;
+}
+
+body.dark-mode .email-display {
+  background-color: rgba(100, 80, 120, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .copy-button svg {
+  fill: #c4aaff;
+}
+
+body.dark-mode .close-modal {
+  background: linear-gradient(135deg, #8f5eff, #ba8fff, #ffb3d6);
+  color: #1a1a1a;
+}
+
+body.dark-mode .close-modal:hover {
+  background: linear-gradient(135deg, #7a4de4, #a16de9, #ff99cc);
+}
+
+body.dark-mode .modal-close-x {
+  color: #d1b3ff;
+}
+
+body.dark-mode .copy-notification {
+  background: linear-gradient(135deg, #7a4de4, #ff99cc);
+  color: black;
+}
+
+
